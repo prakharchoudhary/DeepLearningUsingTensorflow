@@ -1,18 +1,20 @@
+import os
 import tensorflow as tf
 import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
 import math
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 logs_path = 'log_simple_stats_5_layers_relu_softmax'
 batch_size = 100
 learning_rate = 0.5
 training_epochs = 10
 
-mnist = input_data.read_data_sets("MNIST_data/")
+mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
 # training features and labels
-X = tf.placeholder(tf.float32, [None, 28, 28, 1])
-XX = tf.reshape(X, [-1, 784])
+X = tf.placeholder(tf.float32, [None, 784])
 Y_ = tf.placeholder(tf.float32, [None, 10])
 lr = tf.placeholder(tf.float32)
 
@@ -35,6 +37,7 @@ W5 = tf.Variable(tf.truncated_normal([O, 10], stddev=0.1))
 B5 = tf.Variable(tf.ones([10]))
 
 # training
+XX = tf.reshape(X, [-1, 784])
 Y1 = tf.nn.relu(tf.matmul(XX, W1) + B1)
 Y2 = tf.nn.relu(tf.matmul(Y1, W2) + B2)
 Y3 = tf.nn.relu(tf.matmul(Y2, W3) + B3)
@@ -63,19 +66,24 @@ sess.run(init)
 
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
-	writer = tf.summary.FileWriter(logs_path,
-		graph=tf.get_default_graph())
+	writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 	for epoch in range(training_epochs):
 		batch_count = int(mnist.train.num_examples/batch_size)
 		for i in range(batch_count):
 			batch_x, batch_y = mnist.train.next_batch(batch_size)
-			feed_dict = {X : batch_x, Y_ : batch_y}
-			_, summary = sess.run([train_step, summary_op],feed_dict=feed_dict)	
+			max_learning_rate = 0.003
+			min_learning_rate = 0.0001
+			decay_speed = 200
+			learning_rate = min_learning_rate + \
+				(max_learning_rate - min_learning_rate) \
+				 * math.exp(-i/decay_speed)
+
+			feed_dict = {X : batch_x, Y_ : batch_y, lr: learning_rate}
+			_, summary = sess.run([train_step, summary_op], feed_dict=feed_dict)	
 			writer.add_summary(summary, epoch * batch_count + i)
 
 		print("Epoch: ", epoch)
 
-	print("Accuracy: ", accuracy.eval\
-		(feed_dict =  {X: mnist.test.images,
-					Y: mnist.test.layers}))
+	print("Accuracy: ", accuracy.eval(feed_dict={X: mnist.test.images, 
+		Y_: mnist.test.labels}))
 	print("Done")
