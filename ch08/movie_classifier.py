@@ -6,7 +6,7 @@ from keras.layers import LSTM
 from keras.layers.embeddings import Embedding
 from keras.preprocessing import sequence
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = 2
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # fix random seed for reproducibility
 numpy.random.seed(7)
