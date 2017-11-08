@@ -77,7 +77,7 @@ def emotion_cnn(dataset):
 		h_fc1 = tf.nn.relu(tf.matmul(h_flat, weights['wf1']) + biases['bf1'])
 		h_fc1_dropout = tf.nn.dropout(h_fc1, prob)
 
-	with tf.name_scope("fc_1") as scope:
+	with tf.name_scope("fc_2") as scope:
 		tf.summary.histogram("W_fc2", weights['wf2'])
 		tf.summary.histogram("b_fc2", biases['bf2'])
 		#pred = tf.matmul(h_fc1, weights['wf2']) + biases['bf2']
